@@ -1,0 +1,90 @@
+
+<div class="todo-container">
+  <header class="todo-header">
+    <h2>My Todo List</h2>
+    <p class="item-count">
+      {{ items.length }} {{ items.length === 1 ? 'item' : 'items' }}
+      <span *ngIf="getCompletedCount() > 0" class="completed-count">
+        ({{ getCompletedCount() }} completed)
+      </span>
+    </p>
+  </header>
+
+  <div class="add-item-section">
+    <div class="input-group">
+      <input 
+        [(ngModel)]="newItemTitle" 
+        placeholder="What needs to be done?" 
+        (keyup.enter)="addItem()"
+        class="todo-input"
+        maxlength="200"
+      />
+      <button 
+        (click)="addItem()" 
+        class="btn btn-primary"
+        [disabled]="!newItemTitle || newItemTitle.trim() === '' || isAddingItem"
+      >
+        <span *ngIf="!isAddingItem">Add Todo</span>
+        <span *ngIf="isAddingItem">Adding...</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="items-container">
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Loading todos...</p>
+    </div>
+    
+    <div class="items-list" *ngIf="!isLoading && items.length > 0">
+      <div class="item" *ngFor="let item of items; trackBy: trackByFn" [class.completed]="item.isCompleted">
+        <div class="item-content">
+          <label class="checkbox-container">
+            <input 
+              type="checkbox" 
+              [checked]="item.isCompleted" 
+              (change)="toggleComplete(item)"
+              class="todo-checkbox"
+            />
+            <span class="checkmark"></span>
+          </label>
+          
+          <span class="item-text" [class.completed]="item.isCompleted">
+            {{ item.title }}
+          </span>
+        </div>
+        
+        <div class="item-actions">
+          <button 
+            (click)="deleteItem(item.id)" 
+            class="btn btn-danger btn-sm"
+            title="Delete item"
+          >
+            <span class="delete-icon">🗑️</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="empty-state" *ngIf="!isLoading && items.length === 0">
+      <div class="empty-icon">📝</div>
+      <h3>No todos yet</h3>
+      <p>Add your first todo item above to get started!</p>
+    </div>
+  </div>
+
+  <footer class="todo-footer" *ngIf="items.length > 0">
+    <div class="footer-stats">
+      <span class="stat active">{{ getActiveCount() }} active</span>
+      <span class="stat completed">{{ getCompletedCount() }} completed</span>
+    </div>
+    
+    <button 
+      *ngIf="getCompletedCount() > 0"
+      (click)="clearCompleted()"
+      class="btn btn-secondary btn-sm"
+    >
+      Clear Completed
+    </button>
+  </footer>
+</div>
