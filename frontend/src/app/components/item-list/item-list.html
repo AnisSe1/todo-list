@@ -1,8 +1,8 @@
 
 <div class="todo-container">
   <header class="todo-header">
-    <h2>My Todo List</h2>
-    <p class="item-count">
+    <h2>Todos</h2>
+    <p class="item-count text-muted" style="margin:4px 0 0 0; font-size:0.9rem;">
       {{ items.length }} {{ items.length === 1 ? 'item' : 'items' }}
       <span *ngIf="getCompletedCount() > 0" class="completed-count">
         ({{ getCompletedCount() }} completed)
@@ -25,8 +25,7 @@
         [disabled]="!newItemTitle || newItemTitle.trim() === '' || isAddingItem"
       >
         <span *ngIf="!isAddingItem">Add Todo</span>
-        <span *ngIf="isAddingItem">Adding...</span>
-      </button>
+       </button>
     </div>
   </div>
 
