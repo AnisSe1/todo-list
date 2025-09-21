@@ -44,3 +44,4 @@ C:\Users\aseto\OneDrive\Desktop\todo-list\backend\bin\Debug\net9.0\Microsoft.Ent
 C:\Users\aseto\OneDrive\Desktop\todo-list\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\aseto\OneDrive\Desktop\todo-list\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\aseto\OneDrive\Desktop\todo-list\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\aseto\OneDrive\Desktop\todo-list\backend\obj\Debug\net9.0\backend.sourcelink.json

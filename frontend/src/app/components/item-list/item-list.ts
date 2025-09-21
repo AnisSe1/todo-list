@@ -13,9 +13,7 @@ import { ListItem } from '../../models/list-item';
 export class ItemList implements OnInit {
   items: ListItem[] = [];
   newItemTitle: string = '';
-  isLoading: boolean = false;
-  isAddingItem: boolean = false;
-
+ 
   constructor(private itemService: ListItemService) { }
 
   ngOnInit(): void {
@@ -23,86 +21,50 @@ export class ItemList implements OnInit {
   }
 
   loadItems(): void {
-    this.isLoading = true;
-    this.itemService.getItems().subscribe({
-      next: (data) => {
-        this.items = data;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading items:', error);
-        this.isLoading = false;
-        alert('Failed to load items. Please refresh the page.');
-      }
-    });
+    this.itemService.getItems().subscribe(data => this.items = data);
   }
 
   addItem(): void {
-    // Prevent double-clicking and empty submissions
-    if (!this.newItemTitle || this.newItemTitle.trim() === '' || this.isAddingItem) {
-      return;
-    }
+    if (!this.newItemTitle.trim()) return;
 
-    this.isAddingItem = true;
     const newItem: ListItem = { 
-      id: 0, 
+      id: 0,  
       title: this.newItemTitle.trim(), 
       isCompleted: false 
     };
-    
+
+    // Add item to UI immediately for better user experience
+    this.items.push(newItem);
+    const tempItemIndex = this.items.length - 1;
+    this.newItemTitle = '';
+
     this.itemService.addItem(newItem).subscribe({
       next: (createdItem) => {
-        this.newItemTitle = '';
-        this.isAddingItem = false;
-        // Add the new item directly to avoid full reload
-        this.items.push(createdItem);
+        this.items[tempItemIndex] = createdItem;
       },
       error: (error) => {
         console.error('Error adding item:', error);
-        this.isAddingItem = false;
-        alert('Failed to add item. Please try again.');
+        this.items.splice(tempItemIndex, 1);
       }
     });
   }
 
   deleteItem(id: number): void {
-    const itemToDelete = this.items.find(item => item.id === id);
-    if (!itemToDelete) {
-      alert('Item not found.');
-      return;
-    }
-
-    if (confirm(`Are you sure you want to delete "${itemToDelete.title}"?`)) {
-      this.itemService.deleteItem(id).subscribe({
-        next: () => {
-          // Remove the item directly from the array instead of reloading
-          this.items = this.items.filter(item => item.id !== id);
-        },
-        error: (error) => {
-          console.error('Error deleting item:', error);
-          alert(`Failed to delete "${itemToDelete.title}". Please try again.`);
-        }
-      });
+    if (!confirm('Are you sure you want to delete this item?')) return;
+    
+    this.items = this.items.filter(item => item.id !== id);
+    
+    if (id > 0) {
+      this.itemService.deleteItem(id).subscribe();
     }
   }
 
   toggleComplete(item: ListItem): void {
-    // Toggle the completion status
-    const updatedItem = { ...item, isCompleted: !item.isCompleted };
+    item.isCompleted = !item.isCompleted;
     
-    // Call the backend to update the item
-    this.itemService.updateItem(updatedItem).subscribe({
-      next: (updated) => {
-        const index = this.items.findIndex(i => i.id === item.id);
-        if (index >= 0) {
-          this.items[index] = updated;
-        }
-      },
-      error: (error) => {
-        console.error('Error updating item:', error);
-        alert('Failed to update item. Please try again.');
-      }
-    });
+    if (item.id > 0) {
+      this.itemService.updateItem(item).subscribe();
+    }
   }
 
   getCompletedCount(): number {
@@ -115,21 +77,15 @@ export class ItemList implements OnInit {
 
   clearCompleted(): void {
     const completedItems = this.items.filter(item => item.isCompleted);
-    if (completedItems.length === 0) return;
+    if (!completedItems.length) return;
 
-    if (confirm(`Delete ${completedItems.length} completed item(s)?`)) {
-      completedItems.forEach(item => {
-        this.itemService.deleteItem(item.id).subscribe({
-          next: () => {
-            this.items = this.items.filter(i => i.id !== item.id);
-          },
-          error: (error) => {
-            console.error('Error deleting completed item:', error);
-            alert('Failed to delete some completed items. Please try again.');
-          }
-        });
-      });
-    }
+    if (!confirm(`Delete ${completedItems.length} completed item(s)?`)) return;
+
+    this.items = this.items.filter(item => !item.isCompleted);
+    
+    completedItems
+      .filter(item => item.id > 0)
+      .forEach(item => this.itemService.deleteItem(item.id).subscribe());
   }
 
   trackByFn(index: number, item: ListItem): number {

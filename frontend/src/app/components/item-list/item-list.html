@@ -22,20 +22,15 @@
       <button 
         (click)="addItem()" 
         class="btn btn-primary"
-        [disabled]="!newItemTitle || newItemTitle.trim() === '' || isAddingItem"
+        [disabled]="!newItemTitle || newItemTitle.trim() === ''"
       >
-        <span *ngIf="!isAddingItem">Add Todo</span>
+        Add Todo
        </button>
     </div>
   </div>
 
   <div class="items-container">
-    <div class="loading-state" *ngIf="isLoading">
-      <div class="spinner"></div>
-      <p>Loading todos...</p>
-    </div>
-    
-    <div class="items-list" *ngIf="!isLoading && items.length > 0">
+    <div class="items-list" *ngIf="items.length > 0">
       <div class="item" *ngFor="let item of items; trackBy: trackByFn" [class.completed]="item.isCompleted">
         <div class="item-content">
           <label class="checkbox-container">
@@ -65,7 +60,7 @@
       </div>
     </div>
     
-    <div class="empty-state" *ngIf="!isLoading && items.length === 0">
+    <div class="empty-state" *ngIf="items.length === 0">
       <div class="empty-icon">📝</div>
       <h3>No todos yet</h3>
       <p>Add your first todo item above to get started!</p>
