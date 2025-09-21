@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ListItemService } from '../../services/item.service';
@@ -14,14 +14,17 @@ export class ItemList implements OnInit {
   items: ListItem[] = [];
   newItemTitle: string = '';
  
-  constructor(private itemService: ListItemService) { }
+  constructor(private itemService: ListItemService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.loadItems();
   }
 
   loadItems(): void {
-    this.itemService.getItems().subscribe(data => this.items = data);
+    this.itemService.getItems().subscribe(data => {
+      this.items = data;
+      this.cdr.detectChanges();
+    });
   }
 
   addItem(): void {
@@ -37,14 +40,17 @@ export class ItemList implements OnInit {
     this.items.push(newItem);
     const tempItemIndex = this.items.length - 1;
     this.newItemTitle = '';
+    this.cdr.detectChanges();
 
     this.itemService.addItem(newItem).subscribe({
       next: (createdItem) => {
         this.items[tempItemIndex] = createdItem;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error adding item:', error);
         this.items.splice(tempItemIndex, 1);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -53,6 +59,7 @@ export class ItemList implements OnInit {
     if (!confirm('Are you sure you want to delete this item?')) return;
     
     this.items = this.items.filter(item => item.id !== id);
+    this.cdr.detectChanges();
     
     if (id > 0) {
       this.itemService.deleteItem(id).subscribe();
@@ -61,6 +68,7 @@ export class ItemList implements OnInit {
 
   toggleComplete(item: ListItem): void {
     item.isCompleted = !item.isCompleted;
+    this.cdr.detectChanges();
     
     if (item.id > 0) {
       this.itemService.updateItem(item).subscribe();
@@ -82,6 +90,7 @@ export class ItemList implements OnInit {
     if (!confirm(`Delete ${completedItems.length} completed item(s)?`)) return;
 
     this.items = this.items.filter(item => !item.isCompleted);
+    this.cdr.detectChanges();
     
     completedItems
       .filter(item => item.id > 0)
